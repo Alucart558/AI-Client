@@ -21,6 +21,7 @@
             <Label text="Session:"/>
             <ComboBox fx:id="sessionSelector" prefWidth="300" onAction="#handleSessionSelected"/>
             <Button fx:id="newSessionButton" text="New Session" onAction="#handleNewSession"/>
+            <Button fx:id="deleteSessionButton" text="Delete Session" onAction="#handleDeleteSession"/>
         </HBox>
     </top>
 

@@ -26,6 +26,9 @@ public class ChatViewController {
     private Button newSessionButton;
 
     @FXML
+    private Button deleteSessionButton;
+
+    @FXML
     private ListView<String> messageList;
 
     @FXML
@@ -70,9 +73,15 @@ public class ChatViewController {
 
         // Disable send button initially
         sendButton.setDisable(true);
+        deleteSessionButton.setDisable(true);
 
         // Enable send button only when session is selected and input is not empty
         messageInput.textProperty().addListener((obs, oldVal, newVal) -> updateSendButtonState());
+
+        // Enable delete button only when session is selected
+        sessionSelector.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            updateDeleteButtonState();
+        });
 
         refreshSessions();
     }
@@ -166,6 +175,41 @@ public class ChatViewController {
     }
 
     /**
+     * Handles the Delete Session button action.
+     * Prompts for confirmation and deletes the current session.
+     */
+    @FXML
+    private void handleDeleteSession() {
+        if (currentSession == null) {
+            return;
+        }
+
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Delete Session");
+        confirmation.setHeaderText("Delete this chat session?");
+        confirmation.setContentText("This will permanently delete: " + currentSession.getTitle());
+
+        Optional<ButtonType> result = confirmation.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            String sessionId = currentSession.getId();
+
+            new Thread(() -> {
+                try {
+                    chatService.deleteSession(sessionId);
+                    Platform.runLater(() -> {
+                        currentSession = null;
+                        refreshSessions();
+                        messageList.getItems().clear();
+                        updateDeleteButtonState();
+                    });
+                } catch (Exception e) {
+                    Platform.runLater(() -> showError("Failed to delete session: " + e.getMessage()));
+                }
+            }).start();
+        }
+    }
+
+    /**
      * Handles session selection from the ComboBox.
      * Loads messages for the selected session.
      */
@@ -176,6 +220,7 @@ public class ChatViewController {
             currentSession = selected;
             refreshMessages();
             updateSendButtonState();
+            updateDeleteButtonState();
         }
     }
 
@@ -234,6 +279,13 @@ public class ChatViewController {
         boolean hasSession = currentSession != null;
         boolean hasText = !messageInput.getText().trim().isEmpty();
         sendButton.setDisable(!hasSession || !hasText);
+    }
+
+    /**
+     * Updates the delete button state based on session selection.
+     */
+    private void updateDeleteButtonState() {
+        deleteSessionButton.setDisable(currentSession == null);
     }
 
     /**

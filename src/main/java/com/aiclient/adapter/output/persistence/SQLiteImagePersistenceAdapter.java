@@ -36,19 +36,19 @@ public class SQLiteImagePersistenceAdapter implements ImagePersistencePort {
         String sql = "INSERT OR REPLACE INTO generated_images (id, prompt, model_id, file_path, generated_at) " +
                 "VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection conn = databaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try {
+            Connection conn = databaseManager.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, image.getId());
+                stmt.setString(2, image.getPrompt());
+                stmt.setString(3, image.getModelId());
+                stmt.setString(4, image.getFilePath().toString());
+                stmt.setString(5, image.getGeneratedAt().toString());
 
-            stmt.setString(1, image.getId());
-            stmt.setString(2, image.getPrompt());
-            stmt.setString(3, image.getModelId());
-            stmt.setString(4, image.getFilePath().toString());
-            stmt.setString(5, image.getGeneratedAt().toString());
-
-            stmt.executeUpdate();
-            logger.debug("Saved image metadata: {}", image.getId());
-            return image;
-
+                stmt.executeUpdate();
+                logger.debug("Saved image metadata: {}", image.getId());
+                return image;
+            }
         } catch (SQLException e) {
             logger.error("Failed to save image {}: {}", image.getId(), e.getMessage());
             throw new RuntimeException("Failed to save image: " + e.getMessage(), e);
@@ -61,22 +61,22 @@ public class SQLiteImagePersistenceAdapter implements ImagePersistencePort {
 
         String sql = "SELECT id, prompt, model_id, file_path, generated_at FROM generated_images WHERE id = ?";
 
-        try (Connection conn = databaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try {
+            Connection conn = databaseManager.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, imageId);
 
-            stmt.setString(1, imageId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    GeneratedImage image = mapResultSetToImage(rs);
-                    logger.debug("Found image: {}", imageId);
-                    return Optional.of(image);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        GeneratedImage image = mapResultSetToImage(rs);
+                        logger.debug("Found image: {}", imageId);
+                        return Optional.of(image);
+                    }
                 }
+
+                logger.debug("Image not found: {}", imageId);
+                return Optional.empty();
             }
-
-            logger.debug("Image not found: {}", imageId);
-            return Optional.empty();
-
         } catch (SQLException e) {
             logger.error("Failed to find image {}: {}", imageId, e.getMessage());
             throw new RuntimeException("Failed to find image: " + e.getMessage(), e);
@@ -90,17 +90,18 @@ public class SQLiteImagePersistenceAdapter implements ImagePersistencePort {
 
         List<GeneratedImage> images = new ArrayList<>();
 
-        try (Connection conn = databaseManager.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+        try {
+            Connection conn = databaseManager.getConnection();
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery(sql)) {
 
-            while (rs.next()) {
-                images.add(mapResultSetToImage(rs));
+                while (rs.next()) {
+                    images.add(mapResultSetToImage(rs));
+                }
+
+                logger.debug("Found {} images", images.size());
+                return images;
             }
-
-            logger.debug("Found {} images", images.size());
-            return images;
-
         } catch (SQLException e) {
             logger.error("Failed to find all images: {}", e.getMessage());
             throw new RuntimeException("Failed to find images: " + e.getMessage(), e);
@@ -113,18 +114,18 @@ public class SQLiteImagePersistenceAdapter implements ImagePersistencePort {
 
         String sql = "DELETE FROM generated_images WHERE id = ?";
 
-        try (Connection conn = databaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try {
+            Connection conn = databaseManager.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, imageId);
+                int deleted = stmt.executeUpdate();
 
-            stmt.setString(1, imageId);
-            int deleted = stmt.executeUpdate();
-
-            if (deleted > 0) {
-                logger.info("Deleted image metadata: {}", imageId);
-            } else {
-                logger.warn("Image not found for deletion: {}", imageId);
+                if (deleted > 0) {
+                    logger.info("Deleted image metadata: {}", imageId);
+                } else {
+                    logger.warn("Image not found for deletion: {}", imageId);
+                }
             }
-
         } catch (SQLException e) {
             logger.error("Failed to delete image {}: {}", imageId, e.getMessage());
             throw new RuntimeException("Failed to delete image: " + e.getMessage(), e);

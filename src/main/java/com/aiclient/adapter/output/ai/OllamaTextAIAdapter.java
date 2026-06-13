@@ -114,13 +114,13 @@ public class OllamaTextAIAdapter implements TextAIPort {
         Objects.requireNonNull(modelId, "Model ID cannot be null");
 
         try {
-            logger.debug("Checking if model {} is available", modelId);
-            ChatLanguageModel testModel = createChatModel(modelId);
-            testModel.generate("test");
-            logger.debug("Model {} is available", modelId);
-            return true;
+            logger.debug("Checking if model {} is available via Ollama API", modelId);
+            List<String> availableModels = listAvailableModels();
+            boolean available = availableModels.contains(modelId);
+            logger.debug("Model {} availability: {}", modelId, available);
+            return available;
         } catch (Exception e) {
-            logger.warn("Model {} is not available: {}", modelId, e.getMessage());
+            logger.warn("Failed to check model availability: {}", e.getMessage());
             return false;
         }
     }

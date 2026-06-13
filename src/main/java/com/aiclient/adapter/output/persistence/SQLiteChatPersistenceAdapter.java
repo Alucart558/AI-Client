@@ -36,19 +36,19 @@ public class SQLiteChatPersistenceAdapter implements ChatPersistencePort {
         String sql = "INSERT OR REPLACE INTO chat_sessions (id, model_id, title, created_at, last_message_at) " +
                 "VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection conn = databaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try {
+            Connection conn = databaseManager.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, session.getId());
+                stmt.setString(2, session.getModelId());
+                stmt.setString(3, session.getTitle());
+                stmt.setString(4, session.getCreatedAt().toString());
+                stmt.setString(5, session.getLastMessageAt().toString());
 
-            stmt.setString(1, session.getId());
-            stmt.setString(2, session.getModelId());
-            stmt.setString(3, session.getTitle());
-            stmt.setString(4, session.getCreatedAt().toString());
-            stmt.setString(5, session.getLastMessageAt().toString());
-
-            stmt.executeUpdate();
-            logger.debug("Saved chat session: {}", session.getId());
-            return session;
-
+                stmt.executeUpdate();
+                logger.debug("Saved chat session: {}", session.getId());
+                return session;
+            }
         } catch (SQLException e) {
             logger.error("Failed to save session {}: {}", session.getId(), e.getMessage());
             throw new RuntimeException("Failed to save session: " + e.getMessage(), e);
@@ -61,22 +61,22 @@ public class SQLiteChatPersistenceAdapter implements ChatPersistencePort {
 
         String sql = "SELECT id, model_id, title, created_at, last_message_at FROM chat_sessions WHERE id = ?";
 
-        try (Connection conn = databaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try {
+            Connection conn = databaseManager.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, sessionId);
 
-            stmt.setString(1, sessionId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    ChatSession session = mapResultSetToSession(rs);
-                    logger.debug("Found session: {}", sessionId);
-                    return Optional.of(session);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        ChatSession session = mapResultSetToSession(rs);
+                        logger.debug("Found session: {}", sessionId);
+                        return Optional.of(session);
+                    }
                 }
+
+                logger.debug("Session not found: {}", sessionId);
+                return Optional.empty();
             }
-
-            logger.debug("Session not found: {}", sessionId);
-            return Optional.empty();
-
         } catch (SQLException e) {
             logger.error("Failed to find session {}: {}", sessionId, e.getMessage());
             throw new RuntimeException("Failed to find session: " + e.getMessage(), e);
@@ -90,17 +90,18 @@ public class SQLiteChatPersistenceAdapter implements ChatPersistencePort {
 
         List<ChatSession> sessions = new ArrayList<>();
 
-        try (Connection conn = databaseManager.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+        try {
+            Connection conn = databaseManager.getConnection();
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery(sql)) {
 
-            while (rs.next()) {
-                sessions.add(mapResultSetToSession(rs));
+                while (rs.next()) {
+                    sessions.add(mapResultSetToSession(rs));
+                }
+
+                logger.debug("Found {} sessions", sessions.size());
+                return sessions;
             }
-
-            logger.debug("Found {} sessions", sessions.size());
-            return sessions;
-
         } catch (SQLException e) {
             logger.error("Failed to find all sessions: {}", e.getMessage());
             throw new RuntimeException("Failed to find sessions: " + e.getMessage(), e);
@@ -113,18 +114,18 @@ public class SQLiteChatPersistenceAdapter implements ChatPersistencePort {
 
         String sql = "DELETE FROM chat_sessions WHERE id = ?";
 
-        try (Connection conn = databaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try {
+            Connection conn = databaseManager.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, sessionId);
+                int deleted = stmt.executeUpdate();
 
-            stmt.setString(1, sessionId);
-            int deleted = stmt.executeUpdate();
-
-            if (deleted > 0) {
-                logger.info("Deleted session: {}", sessionId);
-            } else {
-                logger.warn("Session not found for deletion: {}", sessionId);
+                if (deleted > 0) {
+                    logger.info("Deleted session: {}", sessionId);
+                } else {
+                    logger.warn("Session not found for deletion: {}", sessionId);
+                }
             }
-
         } catch (SQLException e) {
             logger.error("Failed to delete session {}: {}", sessionId, e.getMessage());
             throw new RuntimeException("Failed to delete session: " + e.getMessage(), e);
@@ -138,19 +139,19 @@ public class SQLiteChatPersistenceAdapter implements ChatPersistencePort {
         String sql = "INSERT OR REPLACE INTO chat_messages (id, session_id, role, content, timestamp) " +
                 "VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection conn = databaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try {
+            Connection conn = databaseManager.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, message.getId());
+                stmt.setString(2, message.getSessionId());
+                stmt.setString(3, message.getRole().name());
+                stmt.setString(4, message.getContent());
+                stmt.setString(5, message.getTimestamp().toString());
 
-            stmt.setString(1, message.getId());
-            stmt.setString(2, message.getSessionId());
-            stmt.setString(3, message.getRole().name());
-            stmt.setString(4, message.getContent());
-            stmt.setString(5, message.getTimestamp().toString());
-
-            stmt.executeUpdate();
-            logger.debug("Saved message: {}", message.getId());
-            return message;
-
+                stmt.executeUpdate();
+                logger.debug("Saved message: {}", message.getId());
+                return message;
+            }
         } catch (SQLException e) {
             logger.error("Failed to save message {}: {}", message.getId(), e.getMessage());
             throw new RuntimeException("Failed to save message: " + e.getMessage(), e);
@@ -166,20 +167,20 @@ public class SQLiteChatPersistenceAdapter implements ChatPersistencePort {
 
         List<ChatMessage> messages = new ArrayList<>();
 
-        try (Connection conn = databaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try {
+            Connection conn = databaseManager.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, sessionId);
 
-            stmt.setString(1, sessionId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    messages.add(mapResultSetToMessage(rs));
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        messages.add(mapResultSetToMessage(rs));
+                    }
                 }
+
+                logger.debug("Found {} messages for session {}", messages.size(), sessionId);
+                return messages;
             }
-
-            logger.debug("Found {} messages for session {}", messages.size(), sessionId);
-            return messages;
-
         } catch (SQLException e) {
             logger.error("Failed to find messages for session {}: {}", sessionId, e.getMessage());
             throw new RuntimeException("Failed to find messages: " + e.getMessage(), e);
@@ -192,14 +193,14 @@ public class SQLiteChatPersistenceAdapter implements ChatPersistencePort {
 
         String sql = "DELETE FROM chat_messages WHERE session_id = ?";
 
-        try (Connection conn = databaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try {
+            Connection conn = databaseManager.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, sessionId);
+                int deleted = stmt.executeUpdate();
 
-            stmt.setString(1, sessionId);
-            int deleted = stmt.executeUpdate();
-
-            logger.debug("Deleted {} messages for session {}", deleted, sessionId);
-
+                logger.debug("Deleted {} messages for session {}", deleted, sessionId);
+            }
         } catch (SQLException e) {
             logger.error("Failed to delete messages for session {}: {}", sessionId, e.getMessage());
             throw new RuntimeException("Failed to delete messages: " + e.getMessage(), e);
