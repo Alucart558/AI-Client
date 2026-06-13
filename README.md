@@ -80,14 +80,23 @@ mvn test
 - Support for .gguf, .safetensors, .bin, and .pth model files
 - Real-time directory watching for model discovery
 
-🚧 **Phase 4 Next**: Data & Storage (SQLite Persistence)
+✅ **Phase 4 Complete**: Data & Storage (SQLite Persistence)
+- DatabaseManager for connection management and schema initialization
+- SQLiteChatPersistenceAdapter for chat sessions and messages
+- SQLiteImagePersistenceAdapter for image metadata
+- 47 comprehensive unit tests (100% pass rate)
+- Automatic database schema creation and migrations
+- Hard delete support (no soft deletes)
+- Foreign key constraints with cascade delete
+
+🚧 **Phase 5 Next**: UI & JavaFX
 
 ## Development Roadmap
 
 - [x] Phase 1: Architecture & Setup
 - [x] Phase 2: Infrastructure & Process Management
 - [x] Phase 3: AI Integration (Adapters)
-- [ ] Phase 4: Data & Storage
+- [x] Phase 4: Data & Storage
 - [ ] Phase 5: UI & JavaFX
 
 ## License
