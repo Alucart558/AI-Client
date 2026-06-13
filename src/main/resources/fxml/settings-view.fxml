@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.aiclient.adapter.input.ui.SettingsController"
+            fitToWidth="true">
+
+    <VBox spacing="15">
+        <padding>
+            <Insets top="20" right="20" bottom="20" left="20"/>
+        </padding>
+
+        <!-- Ollama Configuration -->
+        <Label text="Ollama Configuration" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Label text="Base URL:" minWidth="100"/>
+            <TextField fx:id="ollamaUrlField" HBox.hgrow="ALWAYS" promptText="http://localhost:11434"/>
+        </HBox>
+
+        <Separator/>
+
+        <!-- Stable Diffusion Configuration -->
+        <Label text="Stable Diffusion Configuration" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Label text="Base URL:" minWidth="100"/>
+            <TextField fx:id="sdUrlField" HBox.hgrow="ALWAYS" promptText="http://localhost:7860"/>
+        </HBox>
+
+        <Separator/>
+
+        <!-- Model Scanner Paths -->
+        <Label text="Model Scanner Paths" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+        <Label text="Add directories to scan for AI models:" style="-fx-text-fill: gray;"/>
+
+        <ListView fx:id="scanPathsList" prefHeight="150"/>
+
+        <HBox spacing="10">
+            <Button fx:id="addPathButton" text="Add Path" onAction="#handleAddPath"/>
+            <Button fx:id="removePathButton" text="Remove Selected" onAction="#handleRemovePath" disable="true"/>
+        </HBox>
+
+        <Separator/>
+
+        <!-- Action Buttons -->
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Button fx:id="saveButton" text="Save" onAction="#handleSave" style="-fx-font-weight: bold;"/>
+            <Button fx:id="resetButton" text="Reset to Defaults" onAction="#handleReset"/>
+        </HBox>
+
+    </VBox>
+
+</ScrollPane>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.aiclient.adapter.input.ui.HistoryController">
+
+    <padding>
+        <Insets top="10" right="10" bottom="10" left="10"/>
+    </padding>
+
+    <!-- Top: Mode Selection -->
+    <top>
+        <HBox spacing="20" alignment="CENTER_LEFT">
+            <padding>
+                <Insets bottom="10"/>
+            </padding>
+            <RadioButton fx:id="chatModeRadio" text="Chat Sessions" selected="true" onAction="#handleChatModeSelected">
+                <toggleGroup>
+                    <ToggleGroup fx:id="modeToggleGroup"/>
+                </toggleGroup>
+            </RadioButton>
+            <RadioButton fx:id="imageModeRadio" text="Generated Images" toggleGroup="$modeToggleGroup" onAction="#handleImageModeSelected"/>
+        </HBox>
+    </top>
+
+    <!-- Center: Split Pane with List and Details -->
+    <center>
+        <SplitPane dividerPositions="0.4">
+            <!-- Left: History List -->
+            <VBox spacing="10">
+                <Label text="History" style="-fx-font-weight: bold;"/>
+                <ListView fx:id="historyList" VBox.vgrow="ALWAYS" onMouseClicked="#handleItemSelected"/>
+            </VBox>
+
+            <!-- Right: Details Pane -->
+            <ScrollPane fitToWidth="true" fitToHeight="true">
+                <VBox fx:id="detailsPane" spacing="10">
+                    <padding>
+                        <Insets top="10" right="10" bottom="10" left="10"/>
+                    </padding>
+                    <Label text="Select an item to view details" style="-fx-text-fill: gray;"/>
+                </VBox>
+            </ScrollPane>
+        </SplitPane>
+    </center>
+
+    <!-- Bottom: Action Buttons -->
+    <bottom>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="10"/>
+            </padding>
+            <Button fx:id="deleteButton" text="Delete Selected" onAction="#handleDelete" disable="true"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

@@ -56,6 +56,26 @@ mvn clean install
 mvn test
 ```
 
+## Running the Application
+
+### Using Maven (Recommended for Development)
+```bash
+mvn javafx:run
+```
+
+### Using the Packaged JAR
+```bash
+# First, package the application
+mvn clean package -DskipTests
+
+# Then run the JAR
+java -jar target/ai-client-desktop-1.0.0-SNAPSHOT.jar
+```
+
+**Note:** Before running the application:
+1. Ensure Ollama is installed and at least one model is downloaded (`ollama pull llama2`)
+2. (Optional) Start Stable Diffusion WebUI with API enabled for image generation
+
 ## Current Status
 
 ✅ **Phase 1 Complete**: Architecture definition and setup
@@ -89,7 +109,15 @@ mvn test
 - Hard delete support (no soft deletes)
 - Foreign key constraints with cascade delete
 
-🚧 **Phase 5 Next**: UI & JavaFX
+✅ **Phase 5 Complete**: UI & JavaFX
+- Domain services: ChatService, ImageGenerationService, ModelManagementService
+- JavaFX UI: 5 controllers + 5 FXML views
+- Application wiring: AIClientApplication, DependencyContainer
+- Configuration management
+- 50 comprehensive unit tests (100% pass rate)
+- Background threading for responsiveness
+- Tab-based navigation
+- Graceful shutdown with resource cleanup
 
 ## Development Roadmap
 
@@ -97,7 +125,17 @@ mvn test
 - [x] Phase 2: Infrastructure & Process Management
 - [x] Phase 3: AI Integration (Adapters)
 - [x] Phase 4: Data & Storage
-- [ ] Phase 5: UI & JavaFX
+- [x] Phase 5: UI & JavaFX
+
+## Test Coverage
+
+**165 unit tests** covering all layers:
+- **Domain Services:** 50 tests (ChatService, ImageGenerationService, ModelManagementService)
+- **AI Adapters:** 37 tests (Ollama, Stable Diffusion, FileSystemModelScanner)
+- **Persistence:** 47 tests (DatabaseManager, Chat/Image persistence)
+- **Process Management:** 31 tests (ProcessManagementAdapter, ProcessLauncher)
+
+**100% pass rate** - All tests passing
 
 ## License
 

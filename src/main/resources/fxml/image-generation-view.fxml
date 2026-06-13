@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.aiclient.adapter.input.ui.ImageGenerationController">
+
+    <padding>
+        <Insets top="10" right="10" bottom="10" left="10"/>
+    </padding>
+
+    <!-- Top: Prompt Input and Controls -->
+    <top>
+        <VBox spacing="10">
+            <Label text="Prompt:" style="-fx-font-weight: bold;"/>
+            <TextArea fx:id="promptInput" prefRowCount="3" wrapText="true" promptText="Describe the image you want to generate..."/>
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Model:"/>
+                <ComboBox fx:id="modelSelector" prefWidth="200"/>
+                <Button fx:id="generateButton" text="Generate" onAction="#handleGenerate" defaultButton="true"/>
+                <ProgressIndicator fx:id="progressIndicator" visible="false" prefWidth="30" prefHeight="30"/>
+            </HBox>
+
+            <Separator/>
+        </VBox>
+    </top>
+
+    <!-- Center: Generated Image Display -->
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <VBox alignment="CENTER">
+                <padding>
+                    <Insets top="20" right="20" bottom="20" left="20"/>
+                </padding>
+                <ImageView fx:id="generatedImageView" preserveRatio="true" fitWidth="600" fitHeight="600"/>
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <!-- Bottom: Status Label -->
+    <bottom>
+        <Label fx:id="imageStatus" text="" style="-fx-padding: 10 0 0 0;"/>
+    </bottom>
+
+</BorderPane>
