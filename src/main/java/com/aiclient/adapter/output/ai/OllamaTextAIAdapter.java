@@ -77,7 +77,10 @@ public class OllamaTextAIAdapter implements TextAIPort {
             String userMessage;
             if (e.getMessage() != null && (e.getMessage().contains("connect") || e.getMessage().contains("refused"))) {
                 userMessage = "Cannot connect to Ollama service at " + baseUrl + ". Is Ollama running?";
-            } else if (e.getMessage() != null && (e.getMessage().contains("model") || e.getMessage().contains("not found"))) {
+            } else if (e.getMessage() != null && (e.getMessage().contains("system memory") || e.getMessage().contains("out of memory"))) {
+                userMessage = "Insufficient system memory to run model '" + modelId + "'. " +
+                        "Try a smaller model or free up RAM. Details: " + e.getMessage();
+            } else if (e.getMessage() != null && e.getMessage().contains("not found")) {
                 userMessage = "Model '" + modelId + "' not found. Please select a valid model.";
             } else if (e.getMessage() != null && e.getMessage().contains("timeout")) {
                 userMessage = "Request timed out. Model might be too large or system too slow.";
