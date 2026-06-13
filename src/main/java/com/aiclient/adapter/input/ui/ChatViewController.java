@@ -83,33 +83,47 @@ public class ChatViewController {
      */
     @FXML
     private void handleNewSession() {
-        TextInputDialog dialog = new TextInputDialog("llama2");
-        dialog.setTitle("New Chat Session");
-        dialog.setHeaderText("Create a new chat session");
-        dialog.setContentText("Enter model ID:");
+        new Thread(() -> {
+            try {
+                List<String> models = chatService.getAvailableModels();
 
-        Optional<String> result = dialog.showAndWait();
-        result.ifPresent(modelId -> {
-            if (modelId.trim().isEmpty()) {
-                showError("Model ID cannot be empty");
-                return;
-            }
+                Platform.runLater(() -> {
+                    if (models.isEmpty()) {
+                        showError("Cannot fetch models from Ollama. Is Ollama running?");
+                        return;
+                    }
 
-            new Thread(() -> {
-                try {
-                    ChatSession session = chatService.createSession(modelId.trim());
-                    Platform.runLater(() -> {
-                        refreshSessions();
-                        sessionSelector.getSelectionModel().select(session);
-                        currentSession = session;
-                        refreshMessages();
-                        updateSendButtonState();
+                    ChoiceDialog<String> dialog = new ChoiceDialog<>(models.get(0), models);
+                    dialog.setTitle("New Chat Session");
+                    dialog.setHeaderText("Create a new chat session");
+                    dialog.setContentText("Select model:");
+
+                    Optional<String> result = dialog.showAndWait();
+                    result.ifPresent(modelId -> {
+                        new Thread(() -> {
+                            try {
+                                ChatSession session = chatService.createSession(modelId);
+                                Platform.runLater(() -> {
+                                    refreshSessions();
+                                    sessionSelector.getSelectionModel().select(session);
+                                    currentSession = session;
+                                    refreshMessages();
+                                    updateSendButtonState();
+                                });
+                            } catch (IllegalArgumentException e) {
+                                Platform.runLater(() -> {
+                                    showError("Invalid model: " + e.getMessage());
+                                });
+                            } catch (Exception e) {
+                                Platform.runLater(() -> showError("Failed to create session: " + e.getMessage()));
+                            }
+                        }).start();
                     });
-                } catch (Exception e) {
-                    Platform.runLater(() -> showError("Failed to create session: " + e.getMessage()));
-                }
-            }).start();
-        });
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> showError("Failed to load models: " + e.getMessage()));
+            }
+        }).start();
     }
 
     /**

@@ -53,6 +53,7 @@ class ChatServiceTest {
 
     @Test
     void shouldCreateNewSession() {
+        when(textAIPort.isModelAvailable("llama2")).thenReturn(true);
         when(chatPersistencePort.saveSession(any(ChatSession.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -62,7 +63,9 @@ class ChatServiceTest {
         assertThat(session.getId()).isNotNull();
         assertThat(session.getModelId()).isEqualTo("llama2");
         assertThat(session.getCreatedAt()).isNotNull();
+        assertThat(session.getTitle()).contains("llama2");
 
+        verify(textAIPort).isModelAvailable("llama2");
         verify(chatPersistencePort).saveSession(any(ChatSession.class));
     }
 
@@ -71,6 +74,17 @@ class ChatServiceTest {
         assertThatThrownBy(() -> chatService.createSession(null))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessageContaining("Model ID cannot be null");
+    }
+
+    @Test
+    void shouldRejectUnavailableModelOnCreateSession() {
+        when(textAIPort.isModelAvailable("invalid-model")).thenReturn(false);
+
+        assertThatThrownBy(() -> chatService.createSession("invalid-model"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Model 'invalid-model' is not available in Ollama");
+
+        verify(textAIPort).isModelAvailable("invalid-model");
     }
 
     @Test

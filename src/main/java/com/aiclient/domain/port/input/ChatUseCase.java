@@ -49,4 +49,11 @@ public interface ChatUseCase {
      * @param sessionId Session identifier
      */
     void deleteSession(String sessionId);
+
+    /**
+     * List all available AI models from the AI service.
+     *
+     * @return List of available model names
+     */
+    List<String> getAvailableModels();
 }

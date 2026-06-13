@@ -31,4 +31,19 @@ public interface TextAIPort {
      * @return true if service is healthy
      */
     boolean isAvailable();
+
+    /**
+     * Check if a specific model is available and can be used for generation.
+     *
+     * @param modelId ID of the model to check
+     * @return true if the model is available
+     */
+    boolean isModelAvailable(String modelId);
+
+    /**
+     * List all available models from the AI service.
+     *
+     * @return List of available model names
+     */
+    java.util.List<String> listAvailableModels();
 }

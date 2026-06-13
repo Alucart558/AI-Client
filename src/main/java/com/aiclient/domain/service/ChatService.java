@@ -8,6 +8,7 @@ import com.aiclient.domain.port.output.ChatPersistencePort;
 import com.aiclient.domain.port.output.TextAIPort;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -74,10 +75,17 @@ public class ChatService implements ChatUseCase {
     public ChatSession createSession(String modelId) {
         Objects.requireNonNull(modelId, "Model ID cannot be null");
 
+        if (!textAIPort.isModelAvailable(modelId)) {
+            throw new IllegalArgumentException("Model '" + modelId + "' is not available in Ollama");
+        }
+
         String sessionId = UUID.randomUUID().toString();
         LocalDateTime now = LocalDateTime.now();
 
         ChatSession session = new ChatSession(sessionId, modelId, now);
+
+        String autoTitle = modelId + " - " + now.format(DateTimeFormatter.ofPattern("MMM dd, HH:mm"));
+        session.setTitle(autoTitle);
 
         return chatPersistencePort.saveSession(session);
     }
@@ -100,6 +108,11 @@ public class ChatService implements ChatUseCase {
 
         chatPersistencePort.deleteMessagesBySessionId(sessionId);
         chatPersistencePort.deleteSession(sessionId);
+    }
+
+    @Override
+    public List<String> getAvailableModels() {
+        return textAIPort.listAvailableModels();
     }
 
     private String buildConversationHistory(List<ChatMessage> messages) {
